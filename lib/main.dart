@@ -1,27 +1,22 @@
+import 'package:bloc_app/cubit/todo_cubit.dart';
+import 'package:bloc_app/cubit/todo_state.dart';
+import 'package:bloc_app/data/TodosRepository.dart';
 import 'package:flutter/material.dart';
-import 'package:bloc/bloc.dart';
-import 'dart:math' as math show Random;
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   return runApp(
-    const MaterialApp(
+    MaterialApp(
       title: 'Material App',
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: BlocProvider<TodoCubit>(
+        create: (context) => TodoCubit(
+          repository: TodosRepository(),
+        ),
+        child: HomePage(),
+      ),
     ),
   );
-}
-
-const names = ['Foo', 'Bar', 'Baz'];
-
-extension RandomElement<T> on Iterable<T> {
-  T getRadomElement() => elementAt(math.Random().nextInt(length));
-}
-
-class NamesCubit extends Cubit<String?> {
-  NamesCubit() : super(null);
-
-  void pickRandomName() => emit(names.getRadomElement());
 }
 
 class HomePage extends StatefulWidget {
@@ -32,18 +27,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final NamesCubit cubit;
-
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    cubit = NamesCubit();
-  }
-
-  @override
-  void dispose() {
-    cubit.close();
-    super.dispose();
+    context.read<TodoCubit>().getAllTodos();
   }
 
   @override
@@ -53,33 +41,49 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Home Page"),
         centerTitle: true,
       ),
-      body: StreamBuilder<String?>(
-        stream: cubit.stream,
-        builder: (context, snapshot) {
-          final button = TextButton(
-            onPressed: () => cubit.pickRandomName(),
-            child: const Text("Pick a random name"),
+      body: BlocBuilder<TodoCubit, TodosState>(builder: (context, state) {
+        if (state is LoadingState) {
+          return const Center(
+            child: CircularProgressIndicator(),
           );
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-              return button;
-
-            case ConnectionState.waiting:
-              return button;
-
-            case ConnectionState.active:
-              return Column(
-                children: [
-                  Text(snapshot.data ?? ''),
-                  button,
-                ],
+        } else if (state is ErrorState) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error,
+                color: Colors.red,
+              ),
+              Text(state.error,
+                  style: const TextStyle(
+                    color: Colors.red,
+                  )),
+            ],
+          );
+        } else if (state is LoadedState) {
+          final todos = state.todos;
+          return ListView.builder(
+            itemCount: todos.length,
+            itemBuilder: (context, index) {
+              return Card(
+                elevation: 12,
+                child: ListTile(
+                  title: Text(
+                    todos[index].title,
+                    style: TextStyle(
+                      color: todos[index].completed
+                          ? Colors.greenAccent
+                          : Colors.redAccent,
+                    ),
+                  ),
+                ),
               );
-
-            case ConnectionState.done:
-              return const SizedBox();
-          }
-        },
-      ),
+            },
+          );
+        } else {
+          return Container();
+        }
+      }),
     );
   }
 }
