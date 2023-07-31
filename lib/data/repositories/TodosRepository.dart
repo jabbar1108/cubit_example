@@ -1,6 +1,6 @@
-import 'package:bloc_app/data/TodoProvider.dart';
+import 'package:bloc_app/data/data_providers/TodoProvider.dart';
 
-import '../models/todo.dart';
+import 'package:bloc_app/data/models/todo.dart';
 
 class TodosRepository {
   final TodoProvider todoProvider = TodoProvider();

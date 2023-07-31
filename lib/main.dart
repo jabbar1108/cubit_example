@@ -1,6 +1,6 @@
 import 'package:bloc_app/cubit/todo_cubit.dart';
 import 'package:bloc_app/cubit/todo_state.dart';
-import 'package:bloc_app/data/TodosRepository.dart';
+import 'package:bloc_app/data/repositories/TodosRepository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

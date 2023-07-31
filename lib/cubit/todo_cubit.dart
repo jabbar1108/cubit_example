@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:bloc_app/cubit/todo_state.dart';
-import 'package:bloc_app/data/TodosRepository.dart';
+import 'package:bloc_app/data/repositories/TodosRepository.dart';
 
 class TodoCubit extends Cubit<TodosState> {
   final TodosRepository repository;
